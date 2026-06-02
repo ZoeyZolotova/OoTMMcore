@@ -174,6 +174,10 @@ void Interface_CustomDrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
         ammo = gSave.info.inventory.ammo[ITS_OOT_BOMBCHU];
         maxAmmo = gMaxBombchuOot;
         break;
+    case ITEM_OOT_BOMB_MM:
+        ammo = gOotExtraAmmo.mmBombAmmo;
+        maxAmmo = kMaxBombs[gOotExtraItems.mmBombBagUpgrade];
+        break;
     default:
         return;
     }
@@ -217,6 +221,7 @@ void Interface_DrawAmmoCountWrapper(PlayState* play, s16 button, s16 alpha)
     {
     case ITEM_OOT_POWDER_KEG:
     case ITEM_OOT_BOMBCHU_10:
+    case ITEM_OOT_BOMB_MM:
         Interface_CustomDrawAmmoCount(play, button, alpha);
         break;
     default:

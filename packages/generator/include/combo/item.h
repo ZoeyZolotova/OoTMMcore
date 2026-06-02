@@ -129,7 +129,11 @@
 #define IA_OOT_HAMMER_GFS       0x77
 #define IA_OOT_RUSTY_KEY        0x78
 #define IA_MM_RUSTY_KEY         0x79
-#define IA_MAX                  0x7a
+#define IA_OOT_BOMB_BAG_MM      0x7a
+#define IA_MM_BOMB_BAG_OOT      0x7b
+#define IA_OOT_BOMBS_MM         0x7c
+#define IA_MM_BOMBS_OOT         0x7d
+#define IA_MAX                  0x7e
 #define IA_NONE                 0xff
 
 #define ITT_NONE        0x00

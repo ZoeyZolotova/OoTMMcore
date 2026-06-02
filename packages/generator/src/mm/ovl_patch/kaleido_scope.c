@@ -116,6 +116,10 @@ void KaleidoScope_LoadNamedItemCustom(void* segment, u32 texIndex)
         isForeign = 1;
         texIndex = 0x7b + ITEM_OOT_RUTO_LETTER;
         break;
+    case ITEM_MM_BOMB_OOT:
+        isForeign = 1;
+        texIndex = 0x7b + ITEM_OOT_BOMB;
+        break;
     }
     if (isForeign)
     {
@@ -161,8 +165,11 @@ void KaleidoScope_ShowItemMessage(PlayState* play, u16 messageId, u8 yPosition)
     {
         messageId = 0x170f; /* Use Hookshot message instead of broken OoT Hookshot message */
     }
-    Message_ShowMessageAtYPosition(play, messageId, yPosition);
     s16 itemId = messageId - 0x1700;
+    if (itemId == ITEM_MM_BOMB_OOT) {
+        messageId = 0x1700 + ITEM_MM_BOMB;
+    }
+    Message_ShowMessageAtYPosition(play, messageId, yPosition);
     switch (itemId)
     {
     case ITEM_MM_OCARINA_FAIRY:
@@ -364,15 +371,16 @@ static u32 sCustomIcons[] = {
     ITEM_MM_HAMMER,
     ITEM_MM_BOOMERANG,
     ITEM_MM_RUTO_LETTER,
+    ITEM_MM_BOMB_OOT,
 };
 
-s8 gPlayerFormCustomItemRestrictions[5][ITEM_MM_CUSTOM_MAX - ITEM_MM_CUSTOM_MIN] =
+s8 gPlayerFormCustomItemRestrictions[5][ITEM_MM_CUSTOM_USABLE_MAX - ITEM_MM_CUSTOM_MIN] =
 {
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-    { 1, 1, 1, -1, -1, -1, -1, 1, 1, 1 },
+    { 0, 0, 0,  0,  0,  0,  0, 0, 0, 1, 0 },
+    { 0, 0, 0,  0,  0,  0,  0, 0, 0, 1, 0 },
+    { 0, 0, 0,  0,  0,  0,  0, 0, 0, 1, 0 },
+    { 0, 0, 0,  0,  0,  0,  0, 0, 0, 1, 0 },
+    { 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1 },
 };
 
 typedef void (*KaleidoScope_GrayOutTextureRGBA32)(u32*, u16);
@@ -395,6 +403,7 @@ void KaleidoScope_LoadIcons(u32 vrom, void* dst, size_t* size)
     {
         u32 icon = sCustomIcons[i];
         u32 foreignIcon;
+        float hueShift = 0.0f;
         switch (icon)
         {
         case ITEM_MM_SPELL_FIRE:
@@ -427,6 +436,10 @@ void KaleidoScope_LoadIcons(u32 vrom, void* dst, size_t* size)
         case ITEM_MM_RUTO_LETTER:
             foreignIcon = ITEM_OOT_RUTO_LETTER;
             break;
+        case ITEM_MM_BOMB_OOT:
+            foreignIcon = ITEM_OOT_BOMB;
+            hueShift = 50.0f;
+            break;
         default:
             continue;
         }
@@ -434,8 +447,12 @@ void KaleidoScope_LoadIcons(u32 vrom, void* dst, size_t* size)
         u32 customDestination = gCustomIconAddr + (i * customIconSize);
         DMARomToRam((textureFileAddress + textureOffset) | PI_DOM1_ADDR2, (void*)customDestination, customIconSize);
 
+        if (hueShift) {
+            change_hue((Color_RGBA8*)customDestination, 0x1000 / sizeof(Color_RGBA8), hueShift);
+        }
+
         u8 customItemIndex = icon - ITEM_MM_CUSTOM_MIN;
-        if (customItemIndex >= (ITEM_MM_CUSTOM_MAX - ITEM_MM_CUSTOM_MIN) || !gPlayerFormCustomItemRestrictions[gSaveContext.save.playerForm][customItemIndex])
+        if (customItemIndex >= (ITEM_MM_CUSTOM_USABLE_MAX - ITEM_MM_CUSTOM_MIN) || !gPlayerFormCustomItemRestrictions[gSaveContext.save.playerForm][customItemIndex])
         {
             KaleidoScope_GrayOutTextureRGBA32((u32*)customDestination, customIconSize);
         }
@@ -452,6 +469,15 @@ void KaleidoScope_LoadIcons(u32 vrom, void* dst, size_t* size)
 
 static u32 GetItemTexture(u8 item)
 {
+    if (Config_Flag(CFG_MM_BOMB_BAG_OOT) || Config_Flag(CFG_OOT_BOMB_BAG_MM))
+    {
+        if (item == ITEM_MM_BOMB) {
+            item = ITEM_MM_BOMB_OOT;
+        } else if (item == ITEM_MM_BOMB_OOT) {
+            item = ITEM_MM_BOMB;
+        }
+    }
+
     u32* gItemIcons = (u32*)0x801c1e6c;
     if (item < ITEM_MM_CUSTOM_MIN)
     {
@@ -479,10 +505,10 @@ static u8 GetNextItem(u32 slot, s32* outTableIndex)
 }
 
 /* Vertex buffers. */
-static Vtx gVertexBufs[(4 * 7) * 2];
+static Vtx gVertexBufs[(4 * 8) * 2];
 
 /* Vertex buffer pointers. */
-static Vtx* gVertex[7] = {
+static Vtx* gVertex[8] = {
     &gVertexBufs[(4 * 0) * 2],
     &gVertexBufs[(4 * 1) * 2],
     &gVertexBufs[(4 * 2) * 2],
@@ -490,6 +516,7 @@ static Vtx* gVertex[7] = {
     &gVertexBufs[(4 * 4) * 2],
     &gVertexBufs[(4 * 5) * 2],
     &gVertexBufs[(4 * 6) * 2],
+    &gVertexBufs[(4 * 7) * 2],
 };
 
 static Vtx* GetVtxBuffer(PlayState* play, u32 vertIdx, u32 slot) {
@@ -610,6 +637,11 @@ void KaleidoScope_CustomDrawAmmoCount(PauseContext* pauseCtx, GraphicsContext* g
         maxAmmo = gMaxBombchuMm;
         canEquip = gPlayerFormItemRestrictions[gSaveContext.save.playerForm][item];
         break;
+    case ITEM_MM_BOMB_OOT:
+        ammo = gMmExtraAmmo.ootBombAmmo;
+        maxAmmo = kMaxBombs[gMmExtraItems.ootBombBagUpgrade];
+        canEquip = gPlayerFormCustomItemRestrictions[gSaveContext.save.playerForm][item - ITEM_MM_CUSTOM_MIN];
+        break;
     default:
         return;
     }
@@ -652,6 +684,7 @@ void KaleidoScope_DrawAmmoCountWrapper(PauseContext* pauseCtx, GraphicsContext* 
     switch (item)
     {
     case ITEM_MM_BOMBCHU:
+    case ITEM_MM_BOMB_OOT:
         KaleidoScope_CustomDrawAmmoCount(pauseCtx, gfxCtx, item, ammoIndex);
         break;
     case ITEM_MM_BOOMERANG:

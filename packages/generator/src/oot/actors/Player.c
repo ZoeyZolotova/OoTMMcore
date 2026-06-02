@@ -627,6 +627,7 @@ static u8 sCustomActionModelGroups[] = {
     0xe, /* PLAYER_MODELGROUP_BOTTLE, PLAYER_CUSTOM_IA_SPRING_WATER_HOT */
     0xe, /* PLAYER_MODELGROUP_BOTTLE, PLAYER_CUSTOM_IA_ZORA_EGG */
     0x7, /* PLAYER_MODELGROUP_EXPLOSIVES, PLAYER_CUSTOM_IA_POWDER_KEG */
+    0x7, /* PLAYER_MODELGROUP_EXPLOSIVES, PLAYER_CUSTOM_IA_BOMB_MM */
 };
 
 s32 Player_ActionToModelGroup(Player* this, s32 itemAction) {
@@ -1231,6 +1232,7 @@ static s32 sCustomItemActions[] =
     PLAYER_CUSTOM_IA_ZORA_EGG,          /* ITEM_OOT_ZORA_EGG */
     PLAYER_CUSTOM_IA_POWDER_KEG,        /* ITEM_OOT_POWDER_KEG */
     PLAYER_CUSTOM_IA_GREAT_FAIRY_SWORD, /* ITEM_GFS_MM */
+    PLAYER_CUSTOM_IA_BOMB_MM,           /* ITEM_OOT_BOMB_MM */
 };
 
 s32 Player_CustomItemToItemAction(s32 item, s32 itemAction)
@@ -1692,6 +1694,9 @@ Actor* Player_SpawnExplosive(ActorContext* actorCtx, Player* player, PlayState* 
     case 0x13: /* PLAYER_IA_BOMBCHU */
         actorId = ACTOR_EN_BOM_CHU;
         break;
+    case PLAYER_CUSTOM_IA_BOMB_MM:
+        actorId = ACTOR_CUSTOM_EN_BOM;
+        break;
     case PLAYER_CUSTOM_IA_POWDER_KEG:
         actorId = ACTOR_CUSTOM_EN_BOM;
         if (gCustomSave.powderKegTimer == 0)
@@ -1722,6 +1727,9 @@ s32 Player_ShouldExplosiveError(Player* this, s32 itemAction)
     case 0x13: /* PLAYER_IA_BOMBCHU */
         ammo = gSaveContext.save.info.inventory.ammo[ITS_OOT_BOMBCHU];
         break;
+    case PLAYER_CUSTOM_IA_BOMB_MM:
+        ammo = gOotExtraAmmo.mmBombAmmo;
+        break;
     case PLAYER_CUSTOM_IA_POWDER_KEG:
         if (Player_GetStrength() < 3)
             return 1;
@@ -1739,6 +1747,7 @@ s32 Player_ActionToExplosive(Player* this, s32 itemAction)
     switch (itemAction)
     {
     case 0x12: /* PLAYER_IA_BOMB */
+    case PLAYER_CUSTOM_IA_BOMB_MM:
     case PLAYER_CUSTOM_IA_POWDER_KEG:
         return 0;
     case 0x13: /* PLAYER_IA_BOMBCHU */
@@ -1759,6 +1768,9 @@ void Player_DeductExplosiveAmmo(Player* player)
         break;
     case 0x13: /* PLAYER_IA_BOMBCHU */
         Inventory_ChangeAmmo(ITEM_BOMBCHU_10, -1);
+        break;
+    case PLAYER_CUSTOM_IA_BOMB_MM:
+        DECR(gOotExtraAmmo.mmBombAmmo);
         break;
     case PLAYER_CUSTOM_IA_POWDER_KEG:
         DECR(gOotExtraAmmo.kegAmmo);
@@ -1790,6 +1802,7 @@ void Player_InvokeItemActionInitFunc(PlayState* play, Player* this, ItemActionIn
     switch (this->itemAction)
     {
         case PLAYER_CUSTOM_IA_POWDER_KEG:
+        case PLAYER_CUSTOM_IA_BOMB_MM:
             ItemActionInitFunc Player_InitExplosiveIA = OverlayAddr(0x80831838);
             Player_InitExplosiveIA(play, this);
             break;
@@ -1812,6 +1825,7 @@ void Player_SetUpperActionFuncToHeldItemAction(Player* this, UpperActionFunc upp
     switch (this->itemAction)
     {
     case PLAYER_CUSTOM_IA_POWDER_KEG:
+    case PLAYER_CUSTOM_IA_BOMB_MM:
         upperActionFunc = OverlayAddr(0x80833770); /* Player_UpperAction_CarryActor */
         break;
     case PLAYER_CUSTOM_IA_GREAT_FAIRY_SWORD:

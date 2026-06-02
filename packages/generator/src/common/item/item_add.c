@@ -386,7 +386,7 @@ static void addAmmoMm(u8 slot, u16 item, u8 max, u8 count)
         gMmSave.info.inventory.ammo[slot] = max;
 }
 
-static void addBombsRawOot(u8 count)
+static void addBombsOotRawOot(u8 count)
 {
     u8 max;
 
@@ -396,7 +396,31 @@ static void addBombsRawOot(u8 count)
     addAmmoOot(ITS_OOT_BOMBS, ITEM_OOT_BOMB, max, count);
 }
 
-static void addBombsRawMm(u8 count)
+static void addBombsMmRawOot(u8 count)
+{
+    u8 max;
+
+    if (gOotExtraItems.mmBombBagUpgrade == 0)
+        return;
+    if (gOotSave.info.inventory.items[ITS_OOT_BOMBS] == ITEM_NONE)
+        gOotSave.info.inventory.items[ITS_OOT_BOMBS] = ITEM_OOT_BOMB_MM;
+    max = kMaxBombs[gOotExtraItems.mmBombBagUpgrade];
+    gOotExtraAmmo.mmBombAmmo = CLAMP_MAX(gOotExtraAmmo.mmBombAmmo + count, max);
+}
+
+static void addBombsOotRawMm(u8 count)
+{
+    u8 max;
+
+    if (gMmExtraItems.ootBombBagUpgrade == 0)
+        return;
+    if (gMmSave.info.inventory.items[ITS_MM_BOMBS] == ITEM_NONE)
+        gMmSave.info.inventory.items[ITS_MM_BOMBS] = ITEM_MM_BOMB_OOT;
+    max = kMaxBombs[gMmExtraItems.ootBombBagUpgrade];
+    gMmExtraAmmo.ootBombAmmo = CLAMP_MAX(gMmExtraAmmo.ootBombAmmo + count, max);
+}
+
+static void addBombsMmRawMm(u8 count)
 {
     u8 max;
 
@@ -406,29 +430,59 @@ static void addBombsRawMm(u8 count)
     addAmmoMm(ITS_MM_BOMBS, ITEM_MM_BOMB, max, count);
 }
 
-static void addBombsOot(u8 count)
+static void addBombsOotOot(u8 count)
 {
-    addBombsRawOot(count);
-    if (Config_Flag(CFG_SHARED_BOMB_BAGS))
-        addBombsRawMm(count);
+    addBombsOotRawOot(count);
+    if (Config_Flag(CFG_SHARED_BOMB_BAGS_OOT))
+        addBombsOotRawMm(count);
+    else if (Config_Flag(CFG_SHARED_BOMB_BAGS))
+        addBombsMmRawMm(count);
 }
 
-static void addBombsMm(u8 count)
+static void addBombsMmOot(u8 count)
 {
-    addBombsRawMm(count);
-    if (Config_Flag(CFG_SHARED_BOMB_BAGS))
-        addBombsRawOot(count);
+    addBombsMmRawOot(count);
+    if (Config_Flag(CFG_SHARED_BOMB_BAGS_MM))
+        addBombsMmRawMm(count);
 }
 
-static int addItemBombsOot(PlayState* play, u8 itemId, s16 gi, u16 param)
+static void addBombsOotMm(u8 count)
 {
-    addBombsOot(param);
+    addBombsOotRawMm(count);
+    if (Config_Flag(CFG_SHARED_BOMB_BAGS_OOT))
+        addBombsOotRawOot(count);
+}
+
+static void addBombsMmMm(u8 count)
+{
+    addBombsMmRawMm(count);
+    if (Config_Flag(CFG_SHARED_BOMB_BAGS_MM))
+        addBombsMmRawOot(count);
+    else if (Config_Flag(CFG_SHARED_BOMB_BAGS))
+        addBombsOotRawOot(count);
+}
+
+static int addItemBombsOotOot(PlayState* play, u8 itemId, s16 gi, u16 param)
+{
+    addBombsOotOot(param);
     return 0;
 }
 
-static int addItemBombsMm(PlayState* play, u8 itemId, s16 gi, u16 param)
+static int addItemBombsMmOot(PlayState* play, u8 itemId, s16 gi, u16 param)
 {
-    addBombsMm(param);
+    addBombsMmOot(param);
+    return 0;
+}
+
+static int addItemBombsOotMm(PlayState* play, u8 itemId, s16 gi, u16 param)
+{
+    addBombsOotMm(param);
+    return 0;
+}
+
+static int addItemBombsMmMm(PlayState* play, u8 itemId, s16 gi, u16 param)
+{
+    addBombsMmMm(param);
     return 0;
 }
 
@@ -1075,35 +1129,74 @@ static int addItemSwordMm(PlayState* play, u8 itemId, s16 gi, u16 param)
     return 0;
 }
 
-static void addBombBagRawOot(PlayState* play, u8 index)
+static void addBombBagOotRawOot(PlayState* play, u8 index)
 {
     if (index > gOotSave.info.inventory.upgrades.bombBag)
         gOotSave.info.inventory.upgrades.bombBag = index;
     gOotExtraItems.bombSlot |= 1;
-    addBombsRawOot(kMaxBombs[index]);
+    addBombsOotRawOot(kMaxBombs[index]);
     reloadSlotOot(play, ITS_OOT_BOMBS);
 }
 
-static void addBombBagRawMm(u8 index)
+static void addBombBagMmRawOot(PlayState* play, u8 index)
+{
+    if (index > gOotExtraItems.mmBombBagUpgrade)
+        gOotExtraItems.mmBombBagUpgrade = index;
+    gOotExtraItems.bombSlot |= 4;
+    addBombsMmRawOot(kMaxBombs[index]);
+    reloadSlotOot(play, ITS_OOT_BOMBS);
+}
+
+static void addBombBagOotRawMm(PlayState* play, u8 index)
+{
+    if (index > gMmExtraItems.ootBombBagUpgrade)
+        gMmExtraItems.ootBombBagUpgrade = index;
+    gMmExtraItems.bombSlot |= 2;
+    addBombsOotRawMm(kMaxBombs[index]);
+    reloadSlotOot(play, ITS_MM_BOMBS);
+}
+
+static void addBombBagMmRawMm(u8 index)
 {
     if (index > gMmSave.info.inventory.upgrades.bombBag)
         gMmSave.info.inventory.upgrades.bombBag = index;
-    addBombsRawMm(kMaxBombs[index]);
+    gMmExtraItems.bombSlot |= 1;
+    addBombsMmRawMm(kMaxBombs[index]);
 }
 
-static int addItemBombBagOot(PlayState* play, u8 itemId, s16 gi, u16 param)
+static int addItemBombBagOotOot(PlayState* play, u8 itemId, s16 gi, u16 param)
 {
-    addBombBagRawOot(play, param);
-    if (Config_Flag(CFG_SHARED_BOMB_BAGS))
-        addBombBagRawMm(param);
+    addBombBagOotRawOot(play, param);
+    if (Config_Flag(CFG_SHARED_BOMB_BAGS_OOT))
+        addBombBagOotRawMm(play, param);
+    else if (Config_Flag(CFG_SHARED_BOMB_BAGS))
+        addBombBagMmRawMm(param);
     return 0;
 }
 
-static int addItemBombBagMm(PlayState* play, u8 itemId, s16 gi, u16 param)
+static int addItemBombBagMmOot(PlayState* play, u8 itemId, s16 gi, u16 param)
 {
-    addBombBagRawMm(param);
-    if (Config_Flag(CFG_SHARED_BOMB_BAGS))
-        addBombBagRawOot(play, param);
+    addBombBagMmRawOot(play, param);
+    if (Config_Flag(CFG_SHARED_BOMB_BAGS_MM))
+        addBombBagMmRawMm(param);
+    return 0;
+}
+
+static int addItemBombBagOotMm(PlayState* play, u8 itemId, s16 gi, u16 param)
+{
+    addBombBagOotRawMm(play, param);
+    if (Config_Flag(CFG_SHARED_BOMB_BAGS_OOT))
+        addBombBagOotRawOot(play, param);
+    return 0;
+}
+
+static int addItemBombBagMmMm(PlayState* play, u8 itemId, s16 gi, u16 param)
+{
+    addBombBagMmRawMm(param);
+    if (Config_Flag(CFG_SHARED_BOMB_BAGS_MM))
+        addBombBagMmRawOot(play, param);
+    else if (Config_Flag(CFG_SHARED_BOMB_BAGS))
+        addBombBagOotRawOot(play, param);
     return 0;
 }
 
@@ -2137,8 +2230,8 @@ static const AddItemFunc kAddItemHandlers[] = {
     addItemRupeesMm,
     addItemWalletOot,
     addItemWalletMm,
-    addItemBombsOot,
-    addItemBombsMm,
+    addItemBombsOotOot,
+    addItemBombsMmMm,
     addItemNutsOot,
     addItemNutsMm,
     addItemNutsUpgradeOot,
@@ -2172,8 +2265,8 @@ static const AddItemFunc kAddItemHandlers[] = {
     addItemBeansMm,
     addItemSwordOot,
     addItemSwordMm,
-    addItemBombBagOot,
-    addItemBombBagMm,
+    addItemBombBagOotOot,
+    addItemBombBagMmMm,
     addItemShieldOot,
     addItemShieldMm,
     addItemTunic,
@@ -2255,6 +2348,10 @@ static const AddItemFunc kAddItemHandlers[] = {
     addItemHammerGFS,
     addItemOotRustyKey,
     addItemMmRustyKey,
+    addItemBombBagMmOot,
+    addItemBombBagOotMm,
+    addItemBombsMmOot,
+    addItemBombsOotMm,
 };
 
 _Static_assert(ARRAY_COUNT(kAddItemHandlers) == IA_MAX, "kAddItemHandlers length is wrong");

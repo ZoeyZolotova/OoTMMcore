@@ -5,10 +5,15 @@
 void Interface_LoadItemIconCustom(u32 vrom, s32 id, void* dst, size_t size)
 {
     DmaEntry dma;
+    f32 hueShift = 0.0f;
 
     if (id < ITEM_MM_CUSTOM_MIN)
     {
         LoadIcon(vrom, id, dst, size);
+        if (id == ITEM_MM_BOMB && (Config_Flag(CFG_MM_BOMB_BAG_OOT) || Config_Flag(CFG_OOT_BOMB_BAG_MM)))
+        {
+            hueShift = 50.0f;
+        }
     }
     else
     {
@@ -44,12 +49,20 @@ void Interface_LoadItemIconCustom(u32 vrom, s32 id, void* dst, size_t size)
         case ITEM_MM_RUTO_LETTER:
             id = ITEM_OOT_RUTO_LETTER;
             break;
+        case ITEM_MM_BOMB_OOT:
+            id = ITEM_OOT_BOMB;
+            break;
         }
 
         comboDmaLookupForeignId(&dma, 8);
         u32 textureFileAddress = dma.pstart;
         u32 textureOffset = 0x1000 * id;
         DMARomToRam((textureFileAddress + textureOffset) | PI_DOM1_ADDR2, dst, size);
+    }
+
+    if (hueShift)
+    {
+        change_hue((Color_RGBA8*)dst, 0x1000 / sizeof(Color_RGBA8), hueShift);
     }
 }
 
@@ -75,7 +88,7 @@ u32 Interface_GetCustomIconTexture(PlayState* play, PauseContext* pauseCtx)
     return texture;
 }
 
-extern s8 gPlayerFormCustomItemRestrictions[5][ITEM_MM_CUSTOM_MAX - ITEM_MM_CUSTOM_MIN];
+extern s8 gPlayerFormCustomItemRestrictions[5][ITEM_MM_CUSTOM_USABLE_MAX - ITEM_MM_CUSTOM_MIN];
 
 /* button and item are stored in SP10 and SP14 by HOOK_SAVE */
 s8 Interface_GetItemRestriction(u8 playerForm, PlayState* play, s16* restoreHudVisibility, s32 nothing, u8 item, s16 button)
@@ -165,6 +178,10 @@ void Interface_CustomDrawAmmoCount(PlayState* play, s16 button, s16 alpha)
         ammo = gSave.info.inventory.ammo[ITS_MM_BOMBCHU];
         maxAmmo = gMaxBombchuMm;
         break;
+    case ITEM_MM_BOMB_OOT:
+        ammo = gMmExtraAmmo.ootBombAmmo;
+        maxAmmo = kMaxBombs[gMmExtraItems.ootBombBagUpgrade];
+        break;
     default:
         return;
     }
@@ -214,6 +231,7 @@ void Interface_DrawAmmoCountWrapper(PlayState* play, s16 button, s16 alpha)
     switch (item)
     {
     case ITEM_MM_BOMBCHU:
+    case ITEM_MM_BOMB_OOT:
         Interface_CustomDrawAmmoCount(play, button, alpha);
         break;
     case ITEM_MM_BOOMERANG:

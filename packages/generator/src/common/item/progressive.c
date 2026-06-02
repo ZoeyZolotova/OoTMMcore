@@ -45,16 +45,72 @@ static s16 progressiveBombBagOot(void)
     }
 }
 
+static s16 progressiveBombBagOotOot(void)
+{
+    if (gOotSave.info.inventory.items[ITS_OOT_BOMBS] == ITEM_NONE)
+        return GI_OOT_BOMB_BAG_OOT;
+    switch (gOotSave.info.inventory.upgrades.bombBag)
+    {
+    case 0:
+        return GI_OOT_BOMB_BAG_OOT; /* Redundent */
+    case 1:
+        return GI_OOT_BOMB_BAG2_OOT;
+    default:
+        return GI_OOT_BOMB_BAG3_OOT;
+    }
+}
+
+static s16 progressiveBombBagMmOot(void)
+{
+    if (gOotSave.info.inventory.items[ITS_OOT_BOMBS] == ITEM_NONE)
+        return GI_OOT_BOMB_BAG_MM;
+    switch (gOotExtraItems.mmBombBagUpgrade)
+    {
+    case 0:
+        return GI_OOT_BOMB_BAG_MM; /* Redundent */
+    case 1:
+        return GI_OOT_BOMB_BAG2_MM;
+    default:
+        return GI_OOT_BOMB_BAG3_MM;
+    }
+}
+
 static s16 progressiveBombBagMm(void)
 {
     switch (gMmSave.info.inventory.upgrades.bombBag)
     {
+        case 0:
+            return GI_MM_BOMB_BAG;
+        case 1:
+            return GI_MM_BOMB_BAG2;
+        default:
+            return GI_MM_BOMB_BAG3;
+    }
+}
+
+static s16 progressiveBombBagMmMm(void)
+{
+    switch (gMmSave.info.inventory.upgrades.bombBag)
+    {
     case 0:
-        return GI_MM_BOMB_BAG;
+        return GI_MM_BOMB_BAG_MM;
     case 1:
-        return GI_MM_BOMB_BAG2;
+        return GI_MM_BOMB_BAG2_MM;
     default:
-        return GI_MM_BOMB_BAG3;
+        return GI_MM_BOMB_BAG3_MM;
+    }
+}
+
+static s16 progressiveBombBagOotMm(void)
+{
+    switch (gMmExtraItems.ootBombBagUpgrade)
+    {
+    case 0:
+        return GI_MM_BOMB_BAG_OOT;
+    case 1:
+        return GI_MM_BOMB_BAG2_OOT;
+    default:
+        return GI_MM_BOMB_BAG3_OOT;
     }
 }
 
@@ -446,6 +502,16 @@ s16 Item_Progressive(s16 gi, int ovflags)
     case GI_OOT_BOMB_BAG3:
         gi = progressiveBombBagOot();
         break;
+    case GI_OOT_BOMB_BAG_OOT:
+    case GI_OOT_BOMB_BAG2_OOT:
+    case GI_OOT_BOMB_BAG3_OOT:
+        gi = progressiveBombBagOotOot();
+        break;
+    case GI_OOT_BOMB_BAG_MM:
+    case GI_OOT_BOMB_BAG2_MM:
+    case GI_OOT_BOMB_BAG3_MM:
+        gi = progressiveBombBagMmOot();
+        break;
     case GI_OOT_BOW:
     case GI_OOT_QUIVER2:
     case GI_OOT_QUIVER3:
@@ -562,6 +628,16 @@ s16 Item_Progressive(s16 gi, int ovflags)
     case GI_MM_BOMB_BAG2:
     case GI_MM_BOMB_BAG3:
         gi = progressiveBombBagMm();
+        break;
+    case GI_MM_BOMB_BAG_MM:
+    case GI_MM_BOMB_BAG2_MM:
+    case GI_MM_BOMB_BAG3_MM:
+        gi = progressiveBombBagMmMm();
+        break;
+    case GI_MM_BOMB_BAG_OOT:
+    case GI_MM_BOMB_BAG2_OOT:
+    case GI_MM_BOMB_BAG3_OOT:
+        gi = progressiveBombBagOotMm();
         break;
     case GI_MM_BOW:
     case GI_MM_QUIVER2:

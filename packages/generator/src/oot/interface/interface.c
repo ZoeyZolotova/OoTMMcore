@@ -98,6 +98,10 @@ void comboItemIcon(void* dst, int itemId)
     case ITEM_OOT_POWDER_KEG:
         LoadMmItemIcon(dst, ITEM_MM_POWDER_KEG);
         break;
+    case ITEM_OOT_BOMB_MM:
+        LoadMmItemIcon(dst, ITEM_MM_BOMB);
+        change_hue((Color_RGBA8*)dst, 0x1000 / sizeof(Color_RGBA8), 50.0f);
+        break;
     default:
         LoadFile(dst, 0x7bd000 + itemId * 0x1000, 0x1000);
         break;

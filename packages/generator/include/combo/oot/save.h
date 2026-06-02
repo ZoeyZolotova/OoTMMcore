@@ -426,9 +426,10 @@ typedef struct
     u16 hookshot:2;
     u16 shield:2;
     u16 ocarina:2;
-    u16 bombSlot:2;
+    u16 bombSlot:3;
+    u16 mmBombBagUpgrade:2;
     u16 gfsHammer:2;
-    u16 unused:5;
+    u16 unused:2;
     u8 bottleAdultSlot;
     u8 bottleChildSlot;
 }
@@ -437,7 +438,7 @@ OotExtraItems;
 typedef struct
 {
     s8 kegAmmo;
-    s8 unused0;
+    s8 mmBombAmmo;
     s8 unused1;
     s8 unused2;
 }

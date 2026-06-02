@@ -48,6 +48,12 @@ const u8 kOotHookshot[] = {
 const u8 kOotBomb[] = {
     ITEM_OOT_BOMB,
     ITEM_OOT_POWDER_KEG,
+    ITEM_OOT_BOMB_MM,
+};
+
+const u8 kOotHammerGFS[] = {
+    ITEM_OOT_HAMMER,
+    ITEM_OOT_GREAT_FAIRY_SWORD,
 };
 
 const u8 kMmTrade1[] = {
@@ -95,9 +101,9 @@ const u8 kMmPictoBoom[] = {
     ITEM_MM_BOOMERANG,
 };
 
-const u8 kOotHammerGFS[] = {
-    ITEM_OOT_HAMMER,
-    ITEM_OOT_GREAT_FAIRY_SWORD,
+const u8 kMmBomb[] = {
+    ITEM_MM_BOMB,
+    ITEM_MM_BOMB_OOT,
 };
 
 /* Return value is used to index gVertex */
@@ -149,6 +155,12 @@ s32 comboGetSlotExtras(u32 slot, u8** outItemPtr, u32* outFlags, const u8** outT
         *outTable = kMmPictoBoom;
         *outTableSize = ARRAY_COUNT(kMmPictoBoom);
         result = 6;
+        break;
+    case ITS_MM_BOMBS:
+        *outFlags = gMmExtraItems.bombSlot;
+        *outTable = kMmBomb;
+        *outTableSize = ARRAY_COUNT(kMmBomb);
+        result = 7;
         break;
 #else
     case ITS_OOT_TRADE_ADULT:

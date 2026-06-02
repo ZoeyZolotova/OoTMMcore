@@ -9,4 +9,5 @@
 #define PLAYER_CUSTOM_IA_ZORA_EGG           0x4a
 #define PLAYER_CUSTOM_IA_POWDER_KEG         0x4b
 #define PLAYER_CUSTOM_IA_GREAT_FAIRY_SWORD  0x4c
-#define PLAYER_IA_MAX                       0x4d
+#define PLAYER_CUSTOM_IA_BOMB_MM            0x4d
+#define PLAYER_IA_MAX                       0x4e

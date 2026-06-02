@@ -29,6 +29,7 @@ All notable changes to this project will be documented in this file.
 - Add Shared settings variants of each song above.
 - Add setting for MM-style air movement in OoT.
 - Add Powder Keg (OoT).
+- Add Bomb Bag (OoT) (MM) and Bomb Bag (MM) (OoT).
 
 ### Changed
 

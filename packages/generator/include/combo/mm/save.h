@@ -463,9 +463,20 @@ typedef struct
     u32 goldDust:1;
     u32 hammerGFS:2;
     u32 boomPicto:2;
-    u32 unused:23;
+    u32 bombSlot:2;
+    u32 ootBombBagUpgrade:2;
+    u32 unused:19;
 }
 MmExtraItems;
+
+typedef struct
+{
+    s8 ootBombAmmo;
+    s8 unused1;
+    s8 unused2;
+    s8 unused3;
+}
+MmExtraAmmo;
 
 typedef struct
 {

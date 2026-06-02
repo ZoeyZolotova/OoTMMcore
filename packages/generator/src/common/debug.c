@@ -584,6 +584,9 @@ static void cheatAllItems(PlayState* play)
     gMmExtraItems.hammerGFS = 3;
     gMmExtraItems.boomPicto = 3;
     gCustomSave.ootSongs.value = 0xff;
+    gMmExtraItems.bombSlot = 0b11;
+    gMmExtraItems.ootBombBagUpgrade = 1;
+    gMmExtraAmmo.ootBombAmmo = 20;
 
     // gCustomSave.halfDays = 0b111111;
 
@@ -721,7 +724,9 @@ static void cheatAllItems(PlayState* play)
     gOotExtraItems.bottleAdultSlot = ITEM_OOT_CHATEAU;
     gOotExtraItems.bottleChildSlot = ITEM_OOT_SPRING_WATER;
     gOotExtraAmmo.kegAmmo = 1;
-    gOotExtraItems.bombSlot = 0b11;
+    gOotExtraItems.bombSlot = 0b111;
+    gOotExtraAmmo.mmBombAmmo = 20;
+    gOotExtraItems.mmBombBagUpgrade = 1;
     gSave.info.inventory.items[ITS_OOT_TRADE_ADULT] = ITEM_OOT_POCKET_EGG;
     gSave.info.inventory.items[ITS_OOT_TRADE_CHILD] = ITEM_OOT_BUNNY_HOOD;
 

@@ -2010,6 +2010,10 @@ void KaleidoScope_LoadItemName(void* dst, s16 id)
     {
         comboLoadMmIcon(dst, 0xa27660, ITEM_MM_GREAT_FAIRY_SWORD);
     }
+    else if (itemId == ITEM_OOT_BOMB_MM)
+    {
+        comboLoadMmIcon(dst, 0xa27660, ITEM_MM_BOMB);
+    }
     else
     {
         LoadFile(dst, 0x880000 + 0x400 * id, 0x400);
@@ -2150,6 +2154,12 @@ void KaleidoScope_CustomDrawAmmoCount(PauseContext* pauseCtx, GraphicsContext* g
         itemQuad = ITEM_BOMBCHU_10;
         canEquip = 1;
         break;
+    case ITEM_OOT_BOMB_MM:
+        ammo = gOotExtraAmmo.mmBombAmmo;
+        maxAmmo = kMaxBombs[gOotExtraItems.mmBombBagUpgrade];
+        itemQuad = ITEM_BOMB;
+        canEquip = 1;
+        break;
     default:
         return;
     }
@@ -2201,6 +2211,7 @@ void KaleidoScope_DrawAmmoCountWrapper(PauseContext* pauseCtx, GraphicsContext* 
     {
     case ITEM_OOT_POWDER_KEG:
     case ITEM_OOT_BOMBCHU_10:
+    case ITEM_OOT_BOMB_MM:
         KaleidoScope_CustomDrawAmmoCount(pauseCtx, gfxCtx, item);
         break;
     default:
